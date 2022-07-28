@@ -225,4 +225,51 @@ dim(selected_data_v2)
        [1] 5757411      15
 ```
 ### ANALYZE (4. A summary of your analysis)
+
+# Descriptive analysis on ride_length (all figures in seconds)
+```
+mean(selected_data_v2$ride_length) 
+median(selected_data_v2$ride_length) 
+max(selected_data_v2$ride_length)
+min(selected_data_v2$ride_length) 
+```
+
+| Mean  | Median | Max  | Min  |
+| ----- | ------ | ---- | ---- |
+| 1268.353 secs
+
+| Syntax      | Description |
+| ----------- | ----------- |
+| Header      | Title       |
+| Paragraph   | Text        |
+    
+
+### The Share phase 
+
+#### Conclusions/Summary of insights 
+
+Members and casual riders differ in how long they use the bikes, how often they use the bikes, and on which days of the week does every group peak:
+
+* Casual rides peak during weekends (plot3). There is a high probability they are tourists visiting and sightseeing the city, or that they are ordinary Chicago residents who are riding bike in their leisure time during the weekend. The longer average ride time for casual rider (plot2), also peaking at the weekend,  provides evidence for this point.
+
+* Ride length for members are relatively shorter compared to casual riders. This could clarified as such, that most members use the bikes to commute on workdays. This clarification would also explain the short riding durations of members. They ride from point A to B, namely roughly always the same ride lengths and the same distance
+
+* Ridership start to pick up (plot8) from February (from Spring through Summer)and start to decrease in August (from Fall through winter). This correlation is due to the seasonal changes. As the weather start to get warmer and more pleasant in February (start of Spring), more people starts to cycle, and inversely when the weather  becomes less warm cold around September (start of Fall).
+
+* More than 50% of the riders are annual members (plot5), suggesting that the company have already achieved a certain level of loyalty among its bike users. This indicates a positive message, namely that the company is going to be able to convince many casual riders to convert to members, and to keep the new members satisfied. 
+
+
+#### Recommendations
+
+Give discounts for longer rides when you have a membership
+Longer rides can get some type of rewards program when they become members
+
+* The marketing campaign should be launched between February to August, as the number of trips made by casual riders peaks at this time of the year.
+
+* As casual rider usage reach its highest point on the weekend, the marketing campaign can include weekend-only membership at a sensible price. This could attract casual riders to convert to members.
+
+* The campaign could include ride-length-based tariff plan (maybe only on weekends): Bike more, pay less ! 
+This provides more incentive for the member rides to cycle longer distances. 
+
+* Alternatively, longer rides can be rewarded with benefits such as discount vouchers.
   
