@@ -158,14 +158,6 @@ str(selected_data)
  $ end_lat      : num  41.9 41.8 41.9 41.9 41.9 ...
  $ end_lng      : num  -87.6 -87.6 -87.7 -87.7 -87.7 ...
  $ member_casual: chr  "casual" "casual" "casual" "casual" ...
-
-table(selected_data$rideable_type)
-   classic_bike   docked_bike electric_bike 
-      3202784        291391       2263376 
-
-table(selected_data$member_casual)
-    casual  member 
-    2536358 3221193 
 ```
   *  Problems we will need to fix:
 (1) The data can only be aggregated at the ride-level, which is too granular. We will want to add some additional columns of data — such as day, month,
@@ -224,8 +216,16 @@ selected_data_v2 <- selected_data[!(selected_data$ride_length<0),]
 dim(selected_data_v2)
        [1] 5757411      15
 ```
-### ANALYZE (4. A summary of your analysis)
+### ANALYZE AND VISUALIZATIONS.
 
+# Number of members vs. casual riders
+```
+table(selected_data_v2$member_casual)
+```
+| Members  | Casual |
+| ----- | ------ |
+| 3221113 | 2536298 | 
+   
 # Descriptive analysis on ride_length (all figures in seconds)
 ```
 mean(selected_data_v2$ride_length) 
@@ -236,13 +236,58 @@ min(selected_data_v2$ride_length)
 
 | Mean  | Median | Max  | Min  |
 | ----- | ------ | ---- | ---- |
-| 1268.353 secs
+| 1268 | 691 | 3356649 | 0 |
 
-| Syntax      | Description |
-| ----------- | ----------- |
-| Header      | Title       |
-| Paragraph   | Text        |
-    
+# Compare members and casual users
+```
+aggregate(selected_data_v2$ride_length ~ selected_data_v2$member_casual, FUN = mean)
+aggregate(selected_data_v2$ride_length ~ selected_data_v2$member_casual, FUN = median)
+aggregate(selected_data_v2$ride_length ~ selected_data_v2$member_casual, FUN = max)
+aggregate(selected_data_v2$ride_length ~ selected_data_v2$member_casual, FUN = min)
+```     
+Members:
+           
+| Mean  | Median | Max     | Min  |             
+| ----- | ------ | ----    | ---- |             
+| 788   | 551   | 93594 | 0    |  |     
+
+Casual:
+ 
+ |  Mean  | Median | Max  | Min  |
+ | ----- | ------ | ---- | ----  |
+|   1877 | 934| 3356649 | 0     |
+ 
+ 
+ # See the average ride time by each day for members vs casual users
+ ```
+aggregate(selected_data_v2$ride_length ~ selected_data_v2$member_casual + selected_data_v2$day_of_week, FUN = mean)
+      selected_data_v2$member_casual selected_data_v2$day_of_week selected_data_v2$ride_length
+1                          casual                       Sunday               2218.1479 secs
+2                          member                       Sunday                903.7009 secs
+3                          casual                       Monday               1863.9642 secs
+4                          member                       Monday                762.7473 secs
+5                          casual                      Tuesday               1587.8459 secs
+6                          member                      Tuesday                735.5809 secs
+7                          casual                    Wednesday               1625.5655 secs
+8                          member                    Wednesday                744.9586 secs
+9                          casual                     Thursday               1673.2608 secs
+10                         member                     Thursday                746.2896 secs
+11                         casual                       Friday               1752.5362 secs
+12                         member                       Friday                772.6787 secs
+13                         casual                     Saturday               2051.5933 secs
+14                         member                     Saturday                886.8511 secs
+```
+
+# analyze ridership data by type and weekday
+```
+selected_data_v2 %>% 
+  mutate(weekday = wday(started_at, label = TRUE)) %>%  #creates weekday field using wday()
+  group_by(member_casual, weekday) %>%  #groups by usertype and weekday
+  summarise(number_of_rides = n()				#calculates the number of rides and average duration 
+  ,average_duration = mean(ride_length)) %>% # calculates the average duration
+  arrange(member_casual, weekday)	
+```
+
 
 ### The Share phase 
 
