@@ -29,18 +29,13 @@ Question for marketing team:
   2. Why would casual riders buy Cyclistic annual memberships?
   3. How can Cyclistic use digital media to influence casual riders to become members?
 
-### ASK (1. A clear statement of the business task)
+### ASK 
 
 Moreno has assigned me this question:
 
     * HOW DO ANNUAL MEMBERS AND CASUAL RIDERS USE CYCLISTIC BIKES DIFFERENTLY?
-   
-
-
-5. Supporting visualizations and key findings
-6. Your top three recommendations based on your analysis
     
-### PREPARE (2. A description of all data sources used)
+### PREPARE 
 
 Data sources: 12 months from 01/05/2021 to 01/04/2022 
 Download from: https://divvy-tripdata.s3.amazonaws.com/index.html
@@ -121,7 +116,7 @@ data <- rbind(tripdata_21may,
               tripdata_22mar,
               tripdata_22abr)        
 ```
-### PROCESS (3. Documentation of any cleaning or manipulation of data)
+### PROCESS 
 
 **Inspect the new table that has been created (Name:data)
    
@@ -160,12 +155,15 @@ str(selected_data)
  $ member_casual: chr  "casual" "casual" "casual" "casual" ...
 ```
   *  Problems we will need to fix:
-(1) The data can only be aggregated at the ride-level, which is too granular. We will want to add some additional columns of data — such as day, month,
+  
+1. The data can only be aggregated at the ride-level, which is too granular. We will want to add some additional columns of data — such as day, month,
 year — that provide additional opportunities to aggregate the data.
-(2) We will want to add a calculated field for length of ride, create “tripduration” column. We will add “ride_length” to the entire data frame.
 
-      Problem Solving:
-   (1) 
+2. We will want to add a calculated field for length of ride, create “tripduration” column. We will add “ride_length” to the entire data frame.
+
+        Problem Solving:
+      
+     1.
    ```
    selected_data$date <- as.Date(selected_data$started_at) #Format is yyyy-mm-dd
    selected_data$month <- format(as.Date(selected_data$date), "%m")
@@ -173,7 +171,8 @@ year — that provide additional opportunities to aggregate the data.
    selected_data$year <- format(as.Date(selected_data$date), "%Y")
    selected_data$day_of_week <- format(as.Date(selected_data$date), "%A") 
    ```
-   (2)
+   
+     2.
    ```
    selected_data$ride_length <- difftime(selected_data$ended_at, selected_data$started_at)
    ```
@@ -204,13 +203,13 @@ str(selected_data)
 ```
 
 
-Remove "bad" data
-##### The dataframe includes a few entries where ride_length was negative. (5757551 obs. of  15 variables)
+#### Remove "bad" data
+* The dataframe includes a few entries where ride_length was negative. (5757551 obs. of  15 variables)
 ```
 nrow(selected_data[(selected_data$ride_length<0),])
        [1] 140
 ```
-##### We will create a new version of the dataframe (v2) whitout ride_length negative.
+* We will create a new version of the dataframe (v2) whitout ride_length negative.
 ```
 selected_data_v2 <- selected_data[!(selected_data$ride_length<0),]
 dim(selected_data_v2)
@@ -218,15 +217,20 @@ dim(selected_data_v2)
 ```
 ### ANALYZE AND VISUALIZATIONS.
 
-# Number of members vs. casual riders
+* Number of members vs casual riders
 ```
 table(selected_data_v2$member_casual)
+ggplot(selected_data_v2, aes(member_casual, fill = member_casual)) + geom_bar() +
+  labs(title = "Type of Riders", x = "Customer Type")
 ```
 | Members  | Casual |
 | ----- | ------ |
 | 3221113 | 2536298 | 
+
+![Rplot01](https://user-images.githubusercontent.com/109522662/181612261-b697e995-6fa0-4409-8590-cd55de8eafbd.png)
+
    
-# Descriptive analysis on ride_length (all figures in seconds)
+* Descriptive analysis on ride_length (all figures in seconds)
 ```
 mean(selected_data_v2$ride_length) 
 median(selected_data_v2$ride_length) 
@@ -238,7 +242,7 @@ min(selected_data_v2$ride_length)
 | ----- | ------ | ---- | ---- |
 | 1268 | 691 | 3356649 | 0 |
 
-# Compare members and casual users
+* Compare members and casual users
 ```
 aggregate(selected_data_v2$ride_length ~ selected_data_v2$member_casual, FUN = mean)
 aggregate(selected_data_v2$ride_length ~ selected_data_v2$member_casual, FUN = median)
@@ -258,63 +262,68 @@ Casual:
 |   1877 | 934| 3356649 | 0     |
  
  
- # See the average ride time by each day for members vs casual users
+* Average ride time by each day for members vs casual users + visualization.
  ```
 aggregate(selected_data_v2$ride_length ~ selected_data_v2$member_casual + selected_data_v2$day_of_week, FUN = mean)
-      selected_data_v2$member_casual selected_data_v2$day_of_week selected_data_v2$ride_length
-1                          casual                       Sunday               2218.1479 secs
-2                          member                       Sunday                903.7009 secs
-3                          casual                       Monday               1863.9642 secs
-4                          member                       Monday                762.7473 secs
-5                          casual                      Tuesday               1587.8459 secs
-6                          member                      Tuesday                735.5809 secs
-7                          casual                    Wednesday               1625.5655 secs
-8                          member                    Wednesday                744.9586 secs
-9                          casual                     Thursday               1673.2608 secs
-10                         member                     Thursday                746.2896 secs
-11                         casual                       Friday               1752.5362 secs
-12                         member                       Friday                772.6787 secs
-13                         casual                     Saturday               2051.5933 secs
-14                         member                     Saturday                886.8511 secs
-```
 
-# analyze ridership data by type and weekday
-```
 selected_data_v2 %>% 
   mutate(weekday = wday(started_at, label = TRUE)) %>%  #creates weekday field using wday()
   group_by(member_casual, weekday) %>%  #groups by usertype and weekday
   summarise(number_of_rides = n()				#calculates the number of rides and average duration 
   ,average_duration = mean(ride_length)) %>% # calculates the average duration
   arrange(member_casual, weekday)	
+  ggplot(aes(x = weekday, y = number_of_rides, fill = member_casual)) +
+  geom_col(position = "dodge") + scale_fill_manual(values = c("#66b2ff", "#6666ff"))
 ```
+![Rplot2](https://user-images.githubusercontent.com/109522662/181620151-ed2ee838-be4b-478b-b106-9826c44213be.png)
+
+* Visualization for average duration vs weekdays
+```
+selected_data_v2 %>% 
+  mutate(weekday = wday(started_at, label = TRUE)) %>% 
+  group_by(member_casual, weekday) %>% 
+  summarise(number_of_rides = n()
+  ,average_duration = mean(as.numeric(ride_length))) %>% 
+  arrange(member_casual, weekday)  %>% 
+  ggplot(aes(x = weekday, y = average_duration, fill = member_casual)) +
+  geom_col(position = "dodge")
+```
+![Rplot3](https://user-images.githubusercontent.com/109522662/181621138-bb52b71a-93f5-445f-9981-a1cef9b3108f.png) 
+
+* Visualization for Average duration vs months
+```
+selected_data_v2 %>% 
+  mutate(month=month(started_at, label = TRUE)) %>%
+  group_by(member_casual, month) %>% 
+  summarise(number_of_rides = n()
+  ,average_duration = mean(as.numeric(ride_length))) %>% 
+  arrange(member_casual, month)  %>% 
+  ggplot(aes(x = month, y = average_duration, fill = member_casual)) +
+  geom_col(position = "dodge") + scale_fill_manual(values = c("#66b2ff", "#6666ff"))
+  ```
+  ![Rplot4](https://user-images.githubusercontent.com/109522662/181633490-08954fe1-5fc5-411a-a00b-31673cef8607.png)
 
 
-### The Share phase 
+### Conclusions/Findings
+* The company has more MEMBER subscribers.
 
-#### Conclusions/Summary of insights 
+* Number of riders vs weekdays = members show preferences on weekdays, with a pick on Wednesday. The casual ones show more preferences on weekends with a pick on Saturdays.
 
-Members and casual riders differ in how long they use the bikes, how often they use the bikes, and on which days of the week does every group peak:
+* Average_duration vs weekdays = members show a stable average throughout the week, showing a slight rise on weekends, but staying below 1000 secs. Casual riders show a much higher average, over 1500 secs, showing an increase on weekends over 2000 secs.
 
-* Casual rides peak during weekends (plot3). There is a high probability they are tourists visiting and sightseeing the city, or that they are ordinary Chicago residents who are riding bike in their leisure time during the weekend. The longer average ride time for casual rider (plot2), also peaking at the weekend,  provides evidence for this point.
+* Average_duration vs months = The members show a stable duration, which has a slight increase in the months of May, Jun, Jul, Aug, Sep, but remains below 1000 secs. Casual riders show more fluctuation throughout the year, showing spikes above 2000 secs in the months of May and June, and drops below 1500 secs in the months of Nov. and Dec.
 
-* Ride length for members are relatively shorter compared to casual riders. This could clarified as such, that most members use the bikes to commute on workdays. This clarification would also explain the short riding durations of members. They ride from point A to B, namely roughly always the same ride lengths and the same distance
+### Recommendations
 
-* Ridership start to pick up (plot8) from February (from Spring through Summer)and start to decrease in August (from Fall through winter). This correlation is due to the seasonal changes. As the weather start to get warmer and more pleasant in February (start of Spring), more people starts to cycle, and inversely when the weather  becomes less warm cold around September (start of Fall).
+Considering that this analysis contemplates only one question, which is how the annual members behave in relation to the casual ones, it is not possible to give an accurate conclusion to make a marketing proposal.
 
-* More than 50% of the riders are annual members (plot5), suggesting that the company have already achieved a certain level of loyalty among its bike users. This indicates a positive message, namely that the company is going to be able to convince many casual riders to convert to members, and to keep the new members satisfied. 
+My recommendation is that a more complete analysis is required that includes more personal information of the riders, analyzes other variables such as location, weather.
+
+Perhaps it would be good to do a small survey to the same users, so that they themselves contribute with their requests.
+
+It would be good to carry out an informative campaign based on prices and discounts.
+
+If we assume that both members and casual users use the service through a digital medium, such as a web application, then an individualized campaign could be carried out according to their behavior and based on these improve the benefits of membership, and see the impact of each strategy.
 
 
-#### Recommendations
 
-Give discounts for longer rides when you have a membership
-Longer rides can get some type of rewards program when they become members
-
-* The marketing campaign should be launched between February to August, as the number of trips made by casual riders peaks at this time of the year.
-
-* As casual rider usage reach its highest point on the weekend, the marketing campaign can include weekend-only membership at a sensible price. This could attract casual riders to convert to members.
-
-* The campaign could include ride-length-based tariff plan (maybe only on weekends): Bike more, pay less ! 
-This provides more incentive for the member rides to cycle longer distances. 
-
-* Alternatively, longer rides can be rewarded with benefits such as discount vouchers.
-  
